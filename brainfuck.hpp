@@ -34,10 +34,9 @@ namespace brainfuck
 
   public:
     Brainfuck(size_t);
-
     void CommandsList();
-    // command logics
     int Run();
+    void AddCommand(char);
 
   private:
     // core brainfuck members

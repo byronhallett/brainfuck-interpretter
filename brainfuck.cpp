@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstring>
+#include <algorithm>
 #include <fstream>
 #include <vector>
 #include "brainfuck.hpp"
@@ -32,8 +34,8 @@ int brainfuck::Brainfuck::Run()
   // initialise pointers
   commandPtr = &commands.front();
   cellPtr = &cells.front();
-  int cellID = 0;
 
+  // > 0 means enable skipping
   int skipDepth = 0;
 
   // run until end of program
@@ -57,11 +59,10 @@ int brainfuck::Brainfuck::Run()
       if (*cellPtr == 0)
       {
         skipDepth += 1; // end of loop count, ignore loop body
+        break;
       }
-      else
-      { // loop begin, store jmp point
-        startJmps.push_back(currentCommandPtr);
-      }
+      // loop begin, store jmp point
+      startJmps.push_back(currentCommandPtr);
       break;
     case EndLoop:
       if (skipDepth > 0)
@@ -75,11 +76,9 @@ int brainfuck::Brainfuck::Run()
       break;
     case PrevCell:
       --cellPtr;
-      cellID -= 1;
       break;
     case NextCell:
       ++cellPtr;
-      cellID += 1;
       break;
     case DecCell:
       --*cellPtr;
@@ -101,16 +100,19 @@ int brainfuck::Brainfuck::Run()
   return 0;
 }
 
-std::istream &brainfuck::operator>>(std::istream &is, Brainfuck &bf)
+void brainfuck::Brainfuck::AddCommand(char c)
+{
+  commands.push_back(Command(c));
+}
+
+std::basic_ifstream<char> &operator>>(std::basic_ifstream<char> &is, brainfuck::Brainfuck &bf)
 {
   while (!is.eof()) //stream whole file
   {
     char c;
     is.get(c);
     if (brainfuck::isCommand(c))
-    {
-      bf.commands.push_back(Command(c));
-    }
+      bf.AddCommand(c);
   }
   return is;
 }
